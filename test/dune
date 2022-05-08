@@ -1,0 +1,6 @@
+(library
+ (name dhall_test)
+ (libraries core dhall)
+ (inline_tests)
+ (preprocess (pps ppx_jane)))
+ 
