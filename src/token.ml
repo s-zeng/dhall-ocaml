@@ -56,9 +56,9 @@ and blockCommentChunk () =
   choice [ blockComment (); characters; character; endOfLine ]
 ;;
 
-let blockCommentContinue = blockCommentContinue ()
+(* let blockCommentContinue = blockCommentContinue () *)
 let blockComment = blockComment ()
-let blockCommentChunk = blockCommentChunk ()
+(* let blockCommentChunk = blockCommentChunk () *)
 
 let whitespaceChunk =
   (* TODO: unicode *)
@@ -87,8 +87,31 @@ let hexdig c =
   || Char.between c ~low:'a' ~high:'f'
 ;;
 
-let signPrefix =
+module type Negatable = sig
+  type t
+
+  val neg : t -> t
+end
+
+let signPrefix (type t) (module N : Negatable with type t = t) =
   let positive = char '+' $> Fn.id in
-  let negative = char '-' $> Int.neg in
+  let negative = char '-' $> N.neg in
   positive <|> negative <?> "sign"
 ;;
+
+(* let doubleLiteral = *)
+(*   let+ sign = signPrefix (module Float) <|> return Fn.id in *)
+(*   let+ x = Primitive_tokens.decimal in *)
+(*   let fraction = *)
+(*     let+ _ = char '.' in *)
+(*     let+ digits = many1 Primitive_tokens.digit in *)
+(*     let snoc y d = *)
+(*       y *)
+(*       + Scientific.scientific *)
+(*           (fromIntegral (Char.digitToInt d)) *)
+(*           (Scientific.base10Exponent y - 1) *)
+(*     in *)
+(*     failwith "" *)
+(*   in *)
+(*   failwith "" *)
+(* ;; *)

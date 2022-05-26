@@ -8,4 +8,12 @@ val alpha : char -> bool
 val digit : char -> bool
 val alphaNum : char -> bool
 val hexdig : char -> bool
-val signPrefix : (int -> int) Angstrom.t
+
+module type Negatable = sig
+  type t
+
+  val neg : t -> t
+end
+
+val signPrefix : (module Negatable with type t = 't) -> ('t -> 't) Angstrom.t
+(* val doubleLiteral : float Angstrom.t *)
