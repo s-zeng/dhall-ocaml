@@ -99,19 +99,20 @@ let signPrefix (type t) (module N : Negatable with type t = t) =
   positive <|> negative <?> "sign"
 ;;
 
-(* let doubleLiteral = *)
-(*   let+ sign = signPrefix (module Float) <|> return Fn.id in *)
-(*   let+ x = Primitive_tokens.decimal in *)
-(*   let fraction = *)
-(*     let+ _ = char '.' in *)
-(*     let+ digits = many1 Primitive_tokens.digit in *)
-(*     let snoc y d = *)
-(*       y *)
-(*       + Scientific.scientific *)
-(*           (fromIntegral (Char.digitToInt d)) *)
-(*           (Scientific.base10Exponent y - 1) *)
-(*     in *)
-(*     failwith "" *)
-(*   in *)
-(*   failwith "" *)
-(* ;; *)
+let doubleLiteral =
+  let+ sign = signPrefix (module Float) <|> return Fn.id in
+  let+ x = Primitive_tokens.decimal in
+  let fraction =
+    let+ _ = char '.' in
+    let+ digits = many1 Primitive_tokens.digit in
+    let snoc (y: Scientific.t) d =
+      Scientific.(
+        y
+        + create
+            ~coefficient:(Bigint.of_int (Int.of_string (String.of_char d)))
+            ~base10Exponent:(base10Exponent y - 1))
+    in
+    failwith ""
+  in
+  failwith ""
+;;
