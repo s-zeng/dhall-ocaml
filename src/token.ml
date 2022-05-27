@@ -110,10 +110,7 @@ let doubleLiteral =
             ~coefficient:(Bigint.of_int (Int.of_string (String.of_char d)))
             ~exponent:(exponent y - 1))
     in
-    List.fold_left
-      ~f:snoc
-      ~init:(Scientific.zero)
-      digits
+    List.fold_left ~f:snoc ~init:Scientific.zero digits
   in
   let exponent' =
     let+ _ = Primitive_tokens.oneOf [ 'e'; 'E' ]
@@ -130,8 +127,8 @@ let doubleLiteral =
     Scientific.((Scientific.of_bigint x + y) * e)
   in
   let alternative1 =
-      let+ expo = exponent' in
-      Scientific.(of_bigint x * expo)
+    let+ expo = exponent' in
+    Scientific.(of_bigint x * expo)
   in
   let+ n = alternative0 <|> alternative1 in
   failwith ""

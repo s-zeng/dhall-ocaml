@@ -12,3 +12,4 @@ val ( * ) : t -> t -> t
 val zero : t
 val one : t
 val of_bigint : Bigint.t -> t
+val toRealFloat : t -> float
