@@ -3,9 +3,9 @@ open! Core
 
 type t
 
-val create : coefficient:Bigint.t -> base10Exponent:int -> t
+val create : coefficient:Bigint.t -> exponent:int -> t
 val coefficient : t -> Bigint.t
-val base10Exponent : t -> int
+val exponent : t -> int
 val normalize : t -> t
 val ( + ) : t -> t -> t
 val ( * ) : t -> t -> t

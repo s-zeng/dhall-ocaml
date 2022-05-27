@@ -108,7 +108,7 @@ let doubleLiteral =
         y
         + create
             ~coefficient:(Bigint.of_int (Int.of_string (String.of_char d)))
-            ~base10Exponent:(base10Exponent y - 1))
+            ~exponent:(exponent y - 1))
     in
     List.fold_left
       ~f:snoc
@@ -119,7 +119,7 @@ let doubleLiteral =
     let+ _ = Primitive_tokens.oneOf [ 'e'; 'E' ]
     and+ sign = signPrefix (module Bigint) <|> return Fn.id
     and+ x = Primitive_tokens.decimal in
-    Scientific.create ~coefficient:Bigint.one ~base10Exponent:(Bigint.to_int_exn (sign x))
+    Scientific.create ~coefficient:Bigint.one ~exponent:(Bigint.to_int_exn (sign x))
     (* TODO: to_int_exn is not the right behaviour here, check haskell's fromInteger :: Integer -> Int *)
   in
   let* sign = signPrefix (module Float) <|> return Fn.id in
