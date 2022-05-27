@@ -11,7 +11,10 @@ let endOfLine = string "\n" <|> string "\r\n" <?> "newline"
 let validCodePoint _c = raise_s [%message "tbd"]
 
 let lineCommentPrefix =
-  let predicate c = Uchar.is_char c || [%equal: Uchar.t] c (uchar '\t') in
+  let predicate c =
+    Uchar.between c ~low:(Uchar.of_char '\x20') ~high:(Uchar.of_scalar_exn 0x10FFFF)
+    || [%equal: Uchar.t] c (Uchar.of_char '\t')
+  in
   (* TODO fix unicode handling *)
   let+ _ = string "--"
   and+ commentText = take_while (of_unicode_pred predicate) in
@@ -23,41 +26,47 @@ let lineComment =
   _try (lineCommentPrefix <* endOfLine)
 ;;
 
-(* TODO check no infinite loop *)
-let rec blockCommentContinue () =
-  let endOfComment = void (string "-}") *> return "" in
-  let continue =
-    let+ c = blockCommentChunk ()
-    and+ c' = blockCommentContinue () in
-    c ^ c'
-  in
-  endOfComment <|> continue
-
-and blockComment () =
-  let+ _ = string "{-"
-  and+ c = blockCommentContinue () in
-  "{-" ^ c ^ "-}"
-
-and blockCommentChunk () =
-  let characters_predicate c =
-    (Uchar.is_char c
-    && (not ([%equal: Uchar.t] c (uchar '-')))
-    && not ([%equal: Uchar.t] c (uchar '{')))
-    || [%equal: Uchar.t] c (uchar '\n')
-    || [%equal: Uchar.t] c (uchar '\t')
-  in
-  let characters = take_while1 (of_unicode_pred characters_predicate) in
-  let character_predicate c =
-    Uchar.is_char c
-    || [%equal: Uchar.t] c (uchar '\n')
-    || [%equal: Uchar.t] c (uchar '\t')
-  in
-  let character = satisfy (of_unicode_pred character_predicate) >>| String.of_char in
-  choice [ blockComment (); characters; character; endOfLine ]
+let blockComments =
+  fix (fun comments ->
+      let+ blockCommentContinue, blockComment, blockCommentChunk = comments in
+      let newContinue =
+        let endOfComment = void (string "-}") *> return "" in
+        let continue =
+          let+ c = blockCommentChunk
+          and+ c' = blockCommentContinue in
+          c ^ c'
+        in
+        endOfComment <|> continue
+      in
+      let newComment =
+        let+ _ = string "{-"
+        and+ c = blockCommentContinue in
+        "{-" ^ c ^ "-}"
+      in
+      let newChunk =
+        let characters_predicate c =
+          (Uchar.is_char c
+          && (not ([%equal: Uchar.t] c (uchar '-')))
+          && not ([%equal: Uchar.t] c (uchar '{')))
+          || [%equal: Uchar.t] c (uchar '\n')
+          || [%equal: Uchar.t] c (uchar '\t')
+        in
+        let characters = take_while1 (of_unicode_pred characters_predicate) in
+        let character_predicate c =
+          Uchar.is_char c
+          || [%equal: Uchar.t] c (uchar '\n')
+          || [%equal: Uchar.t] c (uchar '\t')
+        in
+        let character =
+          satisfy (of_unicode_pred character_predicate) >>| String.of_char
+        in
+        choice [ blockComment; characters; character; endOfLine ]
+      in
+      newContinue, newComment, newChunk)
 ;;
 
 (* let blockCommentContinue = blockCommentContinue () *)
-let blockComment = blockComment ()
+let blockComment = blockComments >>= fun (_continue, comment, _chunk) -> comment
 (* let blockCommentChunk = blockCommentChunk () *)
 
 let whitespaceChunk =
