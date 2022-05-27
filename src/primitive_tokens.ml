@@ -10,3 +10,5 @@ let number base baseDigit =
 
 let digit = satisfy Char.is_digit
 let decimal = number (Bigint.of_int 10) digit
+
+let oneOf lst = List.map ~f:char lst |> choice

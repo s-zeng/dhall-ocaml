@@ -100,19 +100,39 @@ let signPrefix (type t) (module N : Negatable with type t = t) =
 ;;
 
 let doubleLiteral =
-  let+ sign = signPrefix (module Float) <|> return Fn.id in
-  let+ x = Primitive_tokens.decimal in
   let fraction =
-    let+ _ = char '.' in
-    let+ digits = many1 Primitive_tokens.digit in
-    let snoc (y: Scientific.t) d =
+    let+ _ = char '.'
+    and+ digits = many1 Primitive_tokens.digit in
+    let snoc (y : Scientific.t) d =
       Scientific.(
         y
         + create
             ~coefficient:(Bigint.of_int (Int.of_string (String.of_char d)))
             ~base10Exponent:(base10Exponent y - 1))
     in
-    failwith ""
+    List.fold_left
+      ~f:snoc
+      ~init:(Scientific.zero)
+      digits
   in
+  let exponent' =
+    let+ _ = Primitive_tokens.oneOf [ 'e'; 'E' ]
+    and+ sign = signPrefix (module Bigint) <|> return Fn.id
+    and+ x = Primitive_tokens.decimal in
+    Scientific.create ~coefficient:Bigint.one ~base10Exponent:(Bigint.to_int_exn (sign x))
+    (* TODO: to_int_exn is not the right behaviour here, check haskell's fromInteger :: Integer -> Int *)
+  in
+  let* sign = signPrefix (module Float) <|> return Fn.id in
+  let* x = Primitive_tokens.decimal in
+  let alternative0 =
+    let+ y = fraction
+    and+ e = exponent' <|> return Scientific.one in
+    Scientific.((Scientific.of_bigint x + y) * e)
+  in
+  let alternative1 =
+      let+ expo = exponent' in
+      Scientific.(of_bigint x * expo)
+  in
+  let+ n = alternative0 <|> alternative1 in
   failwith ""
 ;;
