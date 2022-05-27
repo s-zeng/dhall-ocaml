@@ -16,4 +16,4 @@ module type Negatable = sig
 end
 
 val signPrefix : (module Negatable with type t = 't) -> ('t -> 't) Angstrom.t
-(* val doubleLiteral : float Angstrom.t *)
+val doubleLiteral : float Angstrom.t

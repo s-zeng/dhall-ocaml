@@ -119,17 +119,18 @@ let doubleLiteral =
     Scientific.create ~coefficient:Bigint.one ~exponent:(Bigint.to_int_exn (sign x))
     (* TODO: to_int_exn is not the right behaviour here, check haskell's fromInteger :: Integer -> Int *)
   in
-  let* sign = signPrefix (module Float) <|> return Fn.id in
-  let* x = Primitive_tokens.decimal in
-  let alternative0 =
-    let+ y = fraction
-    and+ e = exponent' <|> return Scientific.one in
-    Scientific.((Scientific.of_bigint x + y) * e)
-  in
-  let alternative1 =
-    let+ expo = exponent' in
-    Scientific.(of_bigint x * expo)
-  in
-  let+ n = alternative0 <|> alternative1 in
-  failwith ""
+  (let* sign = signPrefix (module Float) <|> return Fn.id in
+   let* x = Primitive_tokens.decimal in
+   let alternative0 =
+     let+ y = fraction
+     and+ e = exponent' <|> return Scientific.one in
+     Scientific.((Scientific.of_bigint x + y) * e)
+   in
+   let alternative1 =
+     let+ expo = exponent' in
+     Scientific.(of_bigint x * expo)
+   in
+   let+ n = alternative0 <|> alternative1 in
+   sign (Scientific.toRealFloat n))
+  <?> "literal"
 ;;
