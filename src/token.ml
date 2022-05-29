@@ -22,7 +22,7 @@ let lineCommentPrefix =
 ;;
 
 let lineComment =
-  let _try = option "" in
+  let _try = Fn.id in
   _try (lineCommentPrefix <* endOfLine)
 ;;
 
