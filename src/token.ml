@@ -26,18 +26,20 @@ let lineComment =
   _try (lineCommentPrefix <* endOfLine)
 ;;
 
+let of_lazy = ( >>= ) (return ())
+
 let rec blockCommentContinue () =
   let endOfComment = void (string "-}") *> return "" in
   let continue =
-    let+ c = return () >>= blockCommentChunk
-    and+ c' = return () >>= blockCommentContinue in
+    let+ c = of_lazy blockCommentChunk
+    and+ c' = of_lazy blockCommentContinue in
     c ^ c'
   in
   endOfComment <|> continue
 
 and blockComment () =
   let+ _ = string "{-"
-  and+ c = return () >>= blockCommentContinue in
+  and+ c = of_lazy blockCommentContinue in
   "{-" ^ c ^ "-}"
 
 and blockCommentChunk () =
@@ -55,11 +57,11 @@ and blockCommentChunk () =
     || [%equal: Uchar.t] c (uchar '\t')
   in
   let character = satisfy (of_unicode_pred character_predicate) >>| String.of_char in
-  choice [ return () >>= blockComment; characters; character; endOfLine ]
+  choice [ of_lazy blockComment; characters; character; endOfLine ]
 ;;
 
 (* let blockCommentContinue = blockCommentContinue () *)
-let blockComment = return () >>= blockComment
+let blockComment = of_lazy blockComment
 (* let blockCommentChunk = blockCommentChunk () *)
 
 let whitespaceChunk =

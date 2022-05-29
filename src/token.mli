@@ -17,7 +17,3 @@ end
 
 val signPrefix : (module Negatable with type t = 't) -> ('t -> 't) Angstrom.t
 val doubleLiteral : float Angstrom.t
-
-val lineCommentPrefix : string Angstrom.t
-val lineComment : string Angstrom.t
-val blockComment : string Angstrom.t
