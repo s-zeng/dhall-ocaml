@@ -1,7 +1,7 @@
 (* Port of haskell's Data.Scientific *)
 open! Core
 
-type t
+type t [@@deriving sexp]
 
 val create : coefficient:Bigint.t -> exponent:int -> t
 val coefficient : t -> Bigint.t

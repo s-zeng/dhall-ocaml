@@ -26,7 +26,7 @@ let lineComment =
   _try (lineCommentPrefix <* endOfLine)
 ;;
 
-let of_lazy = ( >>= ) (return ())
+let of_lazy value = bind (return ()) ~f:value
 
 let rec blockCommentContinue () =
   let endOfComment = void (string "-}") *> return "" in

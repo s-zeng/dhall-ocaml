@@ -11,12 +11,13 @@ type t =
    *)
   ; exponent : int
   }
-[@@deriving fields]
+[@@deriving fields, sexp]
 
 let create = Fields.create
+let big10 = Bigint.of_int 10
 
 let rec normalizePositive c e =
-  match Bigint.(c / Bigint.of_int 10), Bigint.rem c (Bigint.of_int 10) with
+  match Bigint.(c / big10), Bigint.rem c big10 with
   | c', r when Bigint.(r = zero) -> normalizePositive c' (e + 1)
   | _ -> create ~coefficient:c ~exponent:e
 ;;
@@ -24,17 +25,17 @@ let rec normalizePositive c e =
 let normalize t =
   match t.coefficient with
   | c when Bigint.(c > zero) -> normalizePositive c t.exponent
-  | c when Bigint.(c < zero) -> normalizePositive c t.exponent
+  | c when Bigint.(c < zero) -> normalizePositive (Bigint.neg c) t.exponent
   | _ -> create ~coefficient:Bigint.zero ~exponent:0
 ;;
 
 let ( + ) t1 t2 =
   if t1.exponent < t2.exponent
   then (
-    let l = Int.pow 10 (t2.exponent - t1.exponent) |> Bigint.of_int in
+    let l = Bigint.pow big10 (Bigint.of_int (t2.exponent - t1.exponent)) in
     { t1 with coefficient = Bigint.(t1.coefficient + (t2.coefficient * l)) })
   else (
-    let r = Int.pow 10 (t1.exponent - t2.exponent) |> Bigint.of_int in
+    let r = Bigint.pow big10 (Bigint.of_int (t1.exponent - t2.exponent)) in
     { t2 with coefficient = Bigint.((t1.coefficient * r) - t2.coefficient) })
 ;;
 
@@ -61,15 +62,15 @@ let toBoundedRealFloat =
   in
   function
   | { coefficient; exponent = _ } when [%equal: Bigint.t] coefficient Bigint.zero ->
-    print_endline "case1";
     Either.second Float.zero
   | { coefficient; exponent } when exponent > limit ->
-    print_endline "case2";
     if Float.(of_int exponent > hilimit)
     then Either.first Float.infinity
-    else Either.second (Bigint.to_float coefficient *. Float.of_int (Int.pow 10 exponent))
+    else
+      Either.second
+        (Bigint.to_float coefficient
+        *. Bigint.to_float (Bigint.pow big10 (Bigint.of_int exponent)))
   | { coefficient; exponent } when exponent < -limit ->
-    print_endline "case3";
     let d =
       coefficient |> Bigint.abs |> Bigint.to_float |> Float.log10 |> Float.round_down
     in
@@ -77,12 +78,12 @@ let toBoundedRealFloat =
     then Either.first (Float.copysign 0. (Bigint.to_float coefficient))
     else Either.second Float.(Bigint.to_float coefficient / (10. ** -of_int exponent))
   | { coefficient; exponent } when exponent < 0 ->
-    print_endline "case4";
     Either.second Float.(Bigint.to_float coefficient / (10. ** -of_int exponent))
   | { coefficient; exponent } ->
-    print_endline "case5";
     Either.second
-      Float.(Bigint.to_float coefficient * (Int.pow 10 exponent |> Float.of_int))
+      Float.(
+        Bigint.to_float coefficient
+        * (Bigint.pow big10 (Bigint.of_int exponent) |> Bigint.to_float))
 ;;
 
 let toRealFloat = Fn.compose Either.value toBoundedRealFloat
