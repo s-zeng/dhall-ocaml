@@ -1,23 +1,8 @@
 open! Core
 open! Dhall
 
-let whole_parse ~parser = Angstrom.parse_string ~consume:Angstrom.Consume.All parser
-
-let test_parses
-    (type t)
-    (module T : Sexpable.S with type t = t)
-    ~(parser : T.t Angstrom.t)
-    ~successes
-    ~failures
-  =
-  let successes = List.map ~f:(whole_parse ~parser) successes in
-  let failures = List.map ~f:(whole_parse ~parser) failures in
-  print_s [%message (successes : (T.t, string) Result.t list)];
-  print_s [%message (failures : (T.t, string) Result.t list)]
-;;
-
 let%expect_test "endOfLine" =
-  test_parses
+  Helpers.test_parses
     (module String)
     ~parser:Token.endOfLine
     ~successes:[ "\n"; "\r\n" ]
@@ -31,7 +16,7 @@ let%expect_test "endOfLine" =
 ;;
 
 let%expect_test "whitespace" =
-  test_parses
+  Helpers.test_parses
     (module Unit)
     ~parser:Token.whitespace
     ~successes:[ ""; " "; "\t"; "\n"; "-- line comment\n"; "{- block comment -}" ]
@@ -45,7 +30,7 @@ let%expect_test "whitespace" =
 ;;
 
 let%expect_test "nonemptyWhitespace" =
-  test_parses
+  Helpers.test_parses
     (module Unit)
     ~parser:Token.nonemptyWhitespace
     ~successes:[ " "; "\t"; "\n"; "-- line comment\n"; "{- block comment -}" ]
@@ -62,7 +47,7 @@ let%expect_test "nonemptyWhitespace" =
 ;;
 
 let%expect_test "doubleLiteral" =
-  test_parses
+  Helpers.test_parses
     (module Float)
     ~parser:Token.doubleLiteral
     ~successes:[ "58.0"; "4e2"; "-123.456e-67"; "0.1E4"; "3.4028234"; "3.4028234e38" ]
