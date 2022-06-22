@@ -11,8 +11,8 @@ let%expect_test "endOfLine" =
     {|
     (successes ((Ok "\n") (Ok "\r\n")))
     (failures
-     ((Error "newline: not enough input") (Error "newline: not enough input")
-      (Error "newline: string"))) |}]
+     ((Error "endOfLine: not enough input") (Error "endOfLine: not enough input")
+      (Error "endOfLine: string"))) |}]
 ;;
 
 let%expect_test "whitespace" =
@@ -58,8 +58,9 @@ let%expect_test "doubleLiteral" =
      ((Ok 58) (Ok 400) (Ok -1.2345599999999999E-65) (Ok 1000) (Ok 3.4028234)
       (Ok 3.4028234E+38)))
     (failures
-     ((Error "doubleLiteral: no more choices")
-      (Error "doubleLiteral: no more choices")
-      (Error "doubleLiteral: satisfy: 's'")
-      (Error "doubleLiteral: not enough input"))) |}]
+     ((Error "doubleLiteral > oneOf (eE): no more choices")
+      (Error "doubleLiteral > oneOf (eE): no more choices")
+      (Error "doubleLiteral > decimal > number (base 10) > digit: satisfy: 's'")
+      (Error
+       "doubleLiteral > decimal > number (base 10) > digit: not enough input"))) |}]
 ;;

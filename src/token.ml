@@ -7,7 +7,7 @@ let ( $> ) f x = f >>| Fn.const x
 let void f = f $> ()
 let of_unicode_pred = Fn.flip Fn.compose Uchar.of_char
 let uchar = Uchar.of_char
-let endOfLine = string "\n" <|> string "\r\n" <?> "newline"
+let endOfLine = string "\n" <|> string "\r\n" <?> "endOfLine"
 let validCodePoint _c = raise_s [%message "tbd"]
 
 let lineCommentPrefix =
@@ -35,7 +35,7 @@ let rec blockCommentContinue () =
     and+ c' = of_thunk blockCommentContinue in
     c ^ c'
   in
-  endOfComment <|> continue <?> "blockComment continue"
+  endOfComment <|> continue <?> "blockCommentContinue"
 
 and blockComment () =
   let* _ = string "{-" in
@@ -58,7 +58,7 @@ and blockCommentChunk () =
   in
   let character = satisfy (of_unicode_pred character_predicate) >>| String.of_char in
   choice [ of_thunk blockComment; characters; character; endOfLine ]
-  <?> "blockComment chunk"
+  <?> "blockCommentChunk"
 ;;
 
 let blockComment = of_thunk blockComment
