@@ -55,6 +55,24 @@ let%expect_test "lineCommentPrefix" =
     (failures ((Error ": end_of_input") (Error ": string"))) |}]
 ;;
 
+let%expect_test "blockComment" =
+  Helpers.test_parses
+    (module String)
+    ~parser:Token.blockComment
+    ~successes:[ "{- block comment! -}"; "{- multi\n line -}"; "{--}" ]
+    ~failures:[ "-- line comment\n"; "{- incomplete" ];
+  [%expect
+    {|
+    (successes
+     ((Ok "{- block comment! -}") (Ok  "{- multi\
+                                      \n line -}") (Ok {--})))
+    (failures
+     ((Error ": string")
+      (Error
+       "blockCommentContinue > blockCommentContinue > blockCommentChunk: no more choices")))
+ |}]
+;;
+
 let%expect_test "nonemptyWhitespace" =
   Helpers.test_parses
     (module Unit)
