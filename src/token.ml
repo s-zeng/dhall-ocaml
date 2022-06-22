@@ -16,31 +16,31 @@ let lineCommentPrefix =
     || [%equal: Uchar.t] c (Uchar.of_char '\t')
   in
   (* TODO fix unicode handling *)
-  let+ _ = string "--"
-  and+ commentText = take_while (of_unicode_pred predicate) in
-  "--" ^ commentText
+  let* _ = string "--" in
+  let* commentText = take_while (of_unicode_pred predicate) in
+  return ("--" ^ commentText) <?> "lineCommentPrefix"
 ;;
 
 let lineComment =
   let _try = Fn.id in
-  _try (lineCommentPrefix <* endOfLine)
+  _try (lineCommentPrefix <* endOfLine) <?> "lineComment"
 ;;
 
-let of_lazy value = bind (return ()) ~f:value
+let of_thunk value = bind (return ()) ~f:value
 
 let rec blockCommentContinue () =
   let endOfComment = void (string "-}") *> return "" in
   let continue =
-    let+ c = of_lazy blockCommentChunk
-    and+ c' = of_lazy blockCommentContinue in
+    let+ c = of_thunk blockCommentChunk
+    and+ c' = of_thunk blockCommentContinue in
     c ^ c'
   in
-  endOfComment <|> continue
+  endOfComment <|> continue <?> "blockComment continue"
 
 and blockComment () =
-  let+ _ = string "{-"
-  and+ c = of_lazy blockCommentContinue in
-  "{-" ^ c ^ "-}"
+  let* _ = string "{-" in
+  let* c = of_thunk blockCommentContinue in
+  return ("{-" ^ c ^ "-}") <?> "blockComment"
 
 and blockCommentChunk () =
   let characters_predicate c =
@@ -57,12 +57,10 @@ and blockCommentChunk () =
     || [%equal: Uchar.t] c (uchar '\t')
   in
   let character = satisfy (of_unicode_pred character_predicate) >>| String.of_char in
-  choice [ of_lazy blockComment; characters; character; endOfLine ]
+  choice [ of_thunk blockComment; characters; character; endOfLine ] <?> "blockComment chunk"
 ;;
 
-(* let blockCommentContinue = blockCommentContinue () *)
-let blockComment = of_lazy blockComment
-(* let blockCommentChunk = blockCommentChunk () *)
+let blockComment = of_thunk blockComment
 
 let whitespaceChunk =
   (* TODO: unicode *)
@@ -76,11 +74,11 @@ let whitespaceChunk =
     ; void lineComment
     ; void blockComment
     ]
-  <?> "whitespace"
+  <?> "whitespaceChunk"
 ;;
 
-let whitespace = skip_many whitespaceChunk
-let nonemptyWhitespace = skip_many1 whitespaceChunk
+let whitespace = skip_many whitespaceChunk <?> "whitespace"
+let nonemptyWhitespace = skip_many1 whitespaceChunk <?> "nonemptyWhitespace"
 let alpha = Char.is_alpha
 let digit = Char.is_digit
 let alphaNum c = alpha c || digit c
