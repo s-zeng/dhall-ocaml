@@ -21,11 +21,9 @@ let lineCommentPrefix =
   return ("--" ^ commentText) <?> "lineCommentPrefix"
 ;;
 
-let lineComment =
-  let _try = Fn.id in
-  _try (lineCommentPrefix <* endOfLine) <?> "lineComment"
-;;
-
+(* The haskell code uses this `try` combinator from time to time, but I'm pretty sure Angstrom doesn't require it *)
+let _try = Fn.id
+let lineComment = _try (lineCommentPrefix <* endOfLine) <?> "lineComment"
 let of_thunk value = bind (return ()) ~f:value
 
 let rec blockCommentContinue () =
@@ -144,4 +142,26 @@ let doubleInfinity =
    and+ a = string "Infinity" *> return (1.0 /. 0.0) in
    sign a)
   <?> "doubleInfinity literal"
+;;
+
+let naturalLiteral =
+  let nonZeroDigit = Char.between ~low:'1' ~high:'9' in
+  let decimalDigit predicate =
+    let+ c = satisfy predicate in
+    Bigint.of_int (Char.to_int c - Char.to_int '0')
+  in
+  let headDigit = decimalDigit nonZeroDigit <?> "non-zero digit" in
+  let tailDigit = decimalDigit digit <?> "digit" in
+  let mkNum =
+    List.fold ~f:(fun acc x -> Bigint.((acc * of_int 10) + x)) ~init:Bigint.zero
+  in
+  let decimal =
+    let+ n = headDigit
+    and+ ns = many tailDigit in
+    mkNum (n :: ns)
+  in
+  _try (char '0' *> char 'x' *> Primitive_tokens.hexadecimal)
+  <|> decimal
+  <|> (char '0' $> Bigint.zero)
+  <?> "naturalLiteral"
 ;;

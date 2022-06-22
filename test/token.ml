@@ -123,3 +123,17 @@ let%expect_test "doubleInfinity" =
       (Error "doubleInfinity literal: not enough input")
       (Error "doubleInfinity literal: not enough input"))) |}]
 ;;
+
+let%expect_test "naturalLiteral" =
+  Helpers.test_parses
+    (module Bigint)
+    ~parser:Token.naturalLiteral
+    ~successes:[ "123123678928479823"; "0"; "0xdeadbeefabcdef" ]
+    ~failures:[ "-4"; "3.2"; "base64" ];
+  [%expect
+    {|
+    (successes ((Ok 123123678928479823) (Ok 0) (Ok 62678480406171119)))
+    (failures
+     ((Error "naturalLiteral: char '0'") (Error ": end_of_input")
+      (Error "naturalLiteral: char '0'"))) |}]
+;;
