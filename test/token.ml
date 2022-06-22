@@ -29,6 +29,20 @@ let%expect_test "whitespace" =
       (Error ": end_of_input"))) |}]
 ;;
 
+let%expect_test "lineComment" =
+  Helpers.test_parses
+    (module String)
+    ~parser:Token.lineComment
+    ~successes:[ "-- line comment\n" ]
+    ~failures:[ "-- line comment no newline"; "{- block comment -}" ];
+  [%expect
+    {|
+    (successes ((Ok "-- line comment")))
+    (failures
+     ((Error "lineComment > endOfLine: not enough input")
+      (Error "lineComment: string"))) |}]
+;;
+
 let%expect_test "nonemptyWhitespace" =
   Helpers.test_parses
     (module Unit)
