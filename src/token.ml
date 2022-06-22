@@ -137,3 +137,11 @@ let doubleLiteral =
    sign (Scientific.toRealFloat n))
   <?> "doubleLiteral"
 ;;
+
+let doubleInfinity =
+  let negative = Angstrom.map ~f:(fun _ -> Float.neg) (char '-') in
+  (let+ sign = negative <|> return Fn.id
+   and+ a = string "Infinity" *> return (1.0 /. 0.0) in
+   sign a)
+  <?> "doubleInfinity literal"
+;;

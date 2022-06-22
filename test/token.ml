@@ -108,3 +108,18 @@ let%expect_test "doubleLiteral" =
       (Error
        "doubleLiteral > decimal > number (base 10) > digit: not enough input"))) |}]
 ;;
+
+let%expect_test "doubleInfinity" =
+  Helpers.test_parses
+    (module Float)
+    ~parser:Token.doubleInfinity
+    ~successes:[ "Infinity"; "-Infinity" ]
+    ~failures:[ "NaN"; "Inf.0"; "-Inf" ];
+  [%expect
+    {|
+    (successes ((Ok INF) (Ok -INF)))
+    (failures
+     ((Error "doubleInfinity literal: not enough input")
+      (Error "doubleInfinity literal: not enough input")
+      (Error "doubleInfinity literal: not enough input"))) |}]
+;;
