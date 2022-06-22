@@ -4,6 +4,7 @@ val endOfLine : string Angstrom.t
 val validCodePoint : int -> bool
 val whitespace : unit Angstrom.t
 val lineComment: string Angstrom.t
+val lineCommentPrefix: string Angstrom.t
 val nonemptyWhitespace : unit Angstrom.t
 val alpha : char -> bool
 val digit : char -> bool

@@ -43,6 +43,18 @@ let%expect_test "lineComment" =
       (Error "lineComment: string"))) |}]
 ;;
 
+let%expect_test "lineCommentPrefix" =
+  Helpers.test_parses
+    (module String)
+    ~parser:Token.lineCommentPrefix
+    ~successes:[ "-- line comment no newline" ]
+    ~failures:[ "-- line comment\n"; "{- block comment -}" ];
+  [%expect
+    {|
+    (successes ((Ok "-- line comment no newline")))
+    (failures ((Error ": end_of_input") (Error ": string"))) |}]
+;;
+
 let%expect_test "nonemptyWhitespace" =
   Helpers.test_parses
     (module Unit)
