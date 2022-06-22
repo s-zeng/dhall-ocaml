@@ -162,6 +162,7 @@ let naturalLiteral =
   in
   _try (char '0' *> char 'x' *> Primitive_tokens.hexadecimal)
   <|> decimal
+      (* TODO: why doesn't the haskell just use megaparsec's decimal? we should replace this with Primitive_tokens.decimal *)
   <|> (char '0' $> Bigint.zero)
   <?> "naturalLiteral"
 ;;
