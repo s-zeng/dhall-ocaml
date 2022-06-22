@@ -73,6 +73,8 @@ let%expect_test "doubleLiteral" =
      ((Ok 58) (Ok 400) (Ok -1.2345599999999999E-65) (Ok 1000) (Ok 3.4028234)
       (Ok 3.4028234E+38)))
     (failures
-     ((Error "literal: no more choices") (Error "literal: no more choices")
-      (Error "literal: satisfy: 's'") (Error "literal: not enough input"))) |}]
+     ((Error "doubleLiteral: no more choices")
+      (Error "doubleLiteral: no more choices")
+      (Error "doubleLiteral: satisfy: 's'")
+      (Error "doubleLiteral: not enough input"))) |}]
 ;;
