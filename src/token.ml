@@ -57,7 +57,8 @@ and blockCommentChunk () =
     || [%equal: Uchar.t] c (uchar '\t')
   in
   let character = satisfy (of_unicode_pred character_predicate) >>| String.of_char in
-  choice [ of_thunk blockComment; characters; character; endOfLine ] <?> "blockComment chunk"
+  choice [ of_thunk blockComment; characters; character; endOfLine ]
+  <?> "blockComment chunk"
 ;;
 
 let blockComment = of_thunk blockComment
@@ -98,7 +99,7 @@ end
 let signPrefix (type t) (module N : Negatable with type t = t) =
   let positive = char '+' $> Fn.id in
   let negative = char '-' $> N.neg in
-  positive <|> negative <?> "sign"
+  positive <|> negative <?> "signPrefix"
 ;;
 
 let doubleLiteral =
@@ -134,5 +135,5 @@ let doubleLiteral =
    in
    let+ n = alternative0 <|> alternative1 in
    sign (Scientific.toRealFloat n))
-  <?> "literal"
+  <?> "doubleLiteral"
 ;;
