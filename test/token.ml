@@ -138,6 +138,18 @@ let%expect_test "naturalLiteral" =
       (Error "naturalLiteral: char '0'"))) |}]
 ;;
 
+let%expect_test "integerLiteral" =
+  Helpers.test_parses
+    (module Bigint)
+    ~parser:Token.integerLiteral
+    ~successes:[ "+123123678928479823"; "+0"; "-0xdeadbeefabcdef"; "-4" ]
+    ~failures:[ "12341234"; "0" ];
+  [%expect
+    {|
+    (successes ((Ok 123123678928479823) (Ok 0) (Ok -62678480406171119) (Ok -4)))
+    (failures ((Error "signPrefix: char '-'") (Error "signPrefix: char '-'"))) |}]
+;;
+
 let%expect_test "dateFullYear" =
   Helpers.test_parses
     (module Int)

@@ -168,6 +168,12 @@ let naturalLiteral =
   <?> "naturalLiteral"
 ;;
 
+let integerLiteral =
+  let* sign = signPrefix (module Bigint) in
+  let* a = naturalLiteral in
+  return (sign a) <?> "integerLiteral"
+;;
+
 let dateFullYear =
   let+ digits =
     Higher_kinded_angstrom.project

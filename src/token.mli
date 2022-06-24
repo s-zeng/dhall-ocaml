@@ -67,6 +67,12 @@ val doubleInfinity : float Angstrom.t
  *)
 val naturalLiteral : Bigint.t Angstrom.t
 
+(** Parse a `Dhall.Syntax.Integer` literal 
+
+    Corresponds to the @integer-literal@ rule from the official grammar
+ *)
+val integerLiteral : Bigint.t Angstrom.t
+
 (** Parse a 4-digit year
 
     Corresponds to the @date-fullyear@ rule from the official grammar
