@@ -166,3 +166,23 @@ let naturalLiteral =
   <|> (char '0' $> Bigint.zero)
   <?> "naturalLiteral"
 ;;
+
+module HigherKindedAngstrom = struct
+    type 'a t = 'a Angstrom.t
+
+    let return = Angstrom.return
+    let map2 ~f a b = Angstrom.(map ~f a <*> b)
+
+    include Higher_kinded.Make (Angstrom)
+end
+
+let dateFullYear =
+  let+ digits =
+    HigherKindedAngstrom.project
+      (Helpers.replicateM
+         (module HigherKindedAngstrom)
+         ~times:4
+         (HigherKindedAngstrom.inject (satisfy digit)))
+  in
+  Helpers.int_of_char_list ~base:10 digits
+;;

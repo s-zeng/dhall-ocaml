@@ -1,15 +1,20 @@
 open! Core
 
-module type MonadWithHigherKinded = sig
+module type ApplicativeWithHigherKinded = sig
   type 'a t
 
-  include Monad.S with type 'a t := 'a t
+  val return : 'a -> 'a t
+  val map2 : f:('a -> 'b -> 'c) -> 'a t -> 'b t -> 'c t
+
   include Higher_kinded.S with type 'a t := 'a t
 end
 
-(* Haskell's Control.Monad.replicateM *)
+(** Haskell's Control.Applicative.replicateM *)
 val replicateM
-  :  (module MonadWithHigherKinded with type higher_kinded = 'higher_kinded)
+  :  (module ApplicativeWithHigherKinded with type higher_kinded = 'higher_kinded)
   -> times:int
   -> ('a -> 'higher_kinded) Higher_kinded.t
   -> ('a list -> 'higher_kinded) Higher_kinded.t
+
+(** Convert a list of digits to the equivalent number *)
+val int_of_char_list : char list -> base:int -> int

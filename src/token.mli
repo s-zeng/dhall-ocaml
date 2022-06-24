@@ -11,6 +11,7 @@ val alpha : char -> bool
 val digit : char -> bool
 val alphaNum : char -> bool
 val hexdig : char -> bool
+val dateFullYear : int Angstrom.t
 
 module type Negatable = sig
   type t

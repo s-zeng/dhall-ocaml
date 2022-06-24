@@ -137,3 +137,17 @@ let%expect_test "naturalLiteral" =
      ((Error "naturalLiteral: char '0'") (Error ": end_of_input")
       (Error "naturalLiteral: char '0'"))) |}]
 ;;
+
+let%expect_test "dateFullYear" =
+  Helpers.test_parses
+    (module Int)
+    ~parser:Token.dateFullYear
+    ~successes:[ "2022"; "1937"; "4096"; "0002" ]
+    ~failures:[ "2"; "5BC"; "672" ];
+  [%expect
+    {|
+    (successes ((Ok 2022) (Ok 1937) (Ok 4096) (Ok 2)))
+    (failures
+     ((Error ": not enough input") (Error ": satisfy: 'B'")
+      (Error ": not enough input"))) |}]
+;;
