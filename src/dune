@@ -1,5 +1,5 @@
 (library
  (name dhall)
- (libraries angstrom core bignum)
+ (libraries angstrom core bignum higher_kinded)
  (preprocess (pps ppx_jane ppx_sexp_message)))
  
