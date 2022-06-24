@@ -9,6 +9,8 @@ module type ApplicativeWithHigherKinded = sig
   include Higher_kinded.S with type 'a t := 'a t
 end
 
+module HigherKindedAngstrom : ApplicativeWithHigherKinded with type 'a t = 'a Angstrom.t
+
 (** Haskell's Control.Applicative.replicateM *)
 val replicateM
   :  (module ApplicativeWithHigherKinded with type higher_kinded = 'higher_kinded)

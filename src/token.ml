@@ -167,15 +167,6 @@ let naturalLiteral =
   <?> "naturalLiteral"
 ;;
 
-module HigherKindedAngstrom = struct
-    type 'a t = 'a Angstrom.t
-
-    let return = Angstrom.return
-    let map2 ~f a b = Angstrom.(map ~f a <*> b)
-
-    include Higher_kinded.Make (Angstrom)
-end
-
 let dateFullYear =
   let+ digits =
     HigherKindedAngstrom.project
