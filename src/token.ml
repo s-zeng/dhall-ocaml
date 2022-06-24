@@ -59,6 +59,7 @@ and blockCommentChunk () =
   <?> "blockCommentChunk"
 ;;
 
+(** Parsed text doesn't include opening braces *)
 let blockComment = of_thunk blockComment
 
 let whitespaceChunk =
@@ -169,11 +170,11 @@ let naturalLiteral =
 
 let dateFullYear =
   let+ digits =
-    HigherKindedAngstrom.project
+    Higher_kinded_angstrom.project
       (Helpers.replicateM
-         (module HigherKindedAngstrom)
+         (module Higher_kinded_angstrom)
          ~times:4
-         (HigherKindedAngstrom.inject (satisfy digit)))
+         (Higher_kinded_angstrom.inject (satisfy digit)))
   in
   Helpers.int_of_char_list ~base:10 digits
 ;;
